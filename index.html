@@ -421,9 +421,9 @@ function syncChips(id,v){
 
 function calc(){
   const pinjam=val(pinjamEl),garap=val(garapEl),profit=val(profitEl);
-  const pct=60;
+  const pct=garap>0?(pinjam/garap)*60:0;
   document.getElementById('pctVal').textContent=fmtPct(pct);
-  document.getElementById('pctForm').textContent='Potongan tetap 60% dari keuntungan';
+  document.getElementById('pctForm').textContent='Pinjaman ÷ Garapan × 60%';
   const splitRows=document.getElementById('splitRows');
   const noProfit=document.getElementById('noProfit');
   if(profit>0){
