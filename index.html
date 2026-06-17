@@ -10,7 +10,7 @@
 <style>
   :root{
     --bg:#0E1613;--bg2:#0A100E;--card:#16201C;--line:#283631;
-    --ink:#EAF0EC;--muted:#8A998F;--gold:#E0B65C;--gold-dim:#9c7e3a;--green:#5FC58D;--radius:18px;
+    --ink:#EAF0EC;--muted:#8A998F;--gold:#E0B65C;--gold-dim:#9c7e3a;--green:#5FC58D;--red:#E05C5C;--radius:18px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{-webkit-text-size-adjust:100%}
@@ -23,7 +23,7 @@
   }
   .wrap{max-width:480px;width:100%}
 
-  header{text-align:center;margin:6px 0 24px}
+  header{text-align:center;margin:6px 0 24px;position:relative}
   h1{font-family:'Sora',sans-serif;font-weight:700;font-size:27px;line-height:1.1;letter-spacing:-.01em}
 
   .layout{display:block}
@@ -44,6 +44,8 @@
   .chip.active{background:var(--gold);border-color:var(--gold);color:#1a1206}
   .chip.clear{margin-left:auto;color:#7d6a6a}
   .chip.clear:hover{border-color:#5a3f3f;color:#c98e8e}
+  .chip.name-chip{background:var(--bg2);border:1px solid var(--line);color:var(--ink)}
+  .chip.name-chip.active{background:var(--green);border-color:var(--green);color:#0a1a10}
 
   .result{background:linear-gradient(165deg,#22302A 0%, #18221E 100%);border:1px solid var(--gold-dim);text-align:center;padding:24px 20px}
   .result .lbl{color:var(--gold);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin-bottom:12px}
@@ -62,7 +64,52 @@
 
   .noprofit{color:var(--muted);font-size:12.5px;margin-top:18px;border-top:1px solid var(--line);padding-top:16px;line-height:1.5}
 
-  /* ---------- DESKTOP / TABLET ---------- */
+  /* Selected name banner */
+  .name-banner{display:flex;align-items:center;justify-content:space-between;background:#1a2e22;border:1px solid var(--green);border-radius:11px;padding:11px 14px;margin-top:12px}
+  .name-banner .nb-name{font-family:'Sora',sans-serif;font-weight:700;font-size:16px;color:var(--green)}
+  .name-banner .nb-pinjam{font-size:12px;color:var(--muted);margin-top:2px}
+  .name-banner button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:2px 4px}
+  .name-banner button:hover{color:var(--red)}
+
+  /* Admin link */
+  .admin-link{display:block;text-align:center;margin-top:28px;color:#2a3a32;font-size:11px;cursor:pointer;text-decoration:none;letter-spacing:.05em;border:none;background:none;width:100%}
+  .admin-link:hover{color:var(--muted)}
+
+  /* Admin styles */
+  .admin-header{text-align:center;margin:6px 0 24px}
+  .admin-header h1{font-size:24px}
+  .back-btn{display:inline-block;color:var(--muted);font-size:13px;cursor:pointer;margin-top:10px;border:none;background:none;text-decoration:underline;font-family:'Inter',sans-serif}
+  .back-btn:hover{color:var(--ink)}
+
+  .input-field{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:12px 15px;color:var(--ink);font-family:'Inter',sans-serif;font-size:15px;outline:none;transition:border-color .15s}
+  .input-field:focus{border-color:var(--gold)}
+  .input-field::placeholder{color:#465249}
+  select.input-field{cursor:pointer;-webkit-appearance:none;appearance:none}
+
+  .btn{display:block;width:100%;padding:14px;border:none;border-radius:12px;font-family:'Sora',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:all .15s}
+  .btn-gold{background:var(--gold);color:#1a1206}
+  .btn-gold:hover{background:#e8c06e}
+  .btn-green{background:var(--green);color:#0a1a10}
+  .btn-green:hover{background:#74d4a0}
+
+  .person-list{display:flex;flex-direction:column;gap:10px}
+  .person-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .person-item .pi-name{font-family:'Sora',sans-serif;font-weight:700;font-size:16px}
+  .person-item .pi-pinjam{color:var(--gold);font-size:13px;margin-top:3px}
+  .person-item .pi-del{background:none;border:none;color:#5a3a3a;cursor:pointer;font-size:20px;padding:2px 6px;transition:color .12s}
+  .person-item .pi-del:hover{color:var(--red)}
+
+  .empty-msg{text-align:center;color:var(--muted);padding:28px 0;font-size:14px}
+
+  .form-group{margin-bottom:14px}
+  .form-label{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:7px}
+
+  .alert{border-radius:11px;padding:12px 16px;font-size:13px;margin-bottom:14px;display:none}
+  .alert-err{background:#2a1010;border:1px solid #5a2020;color:#f09090}
+  .alert-ok{background:#0e2a1a;border:1px solid #1a5a30;color:#70d090}
+
+  .login-wrap{max-width:340px;margin:60px auto 0}
+
   @media (min-width:840px){
     body{align-items:flex-start;padding-top:48px}
     .wrap{max-width:880px}
@@ -73,22 +120,30 @@
     .result{position:sticky;top:48px}
     .pctbig{font-size:60px}
   }
-  @media (min-width:840px) and (max-width:1000px){
-    .pctbig{font-size:48px}
-  }
-
-  /* keep usable on very small phones */
-  @media (max-width:360px){
-    .pctbig{font-size:46px}
-    .inputrow input{font-size:21px}
-  }
+  @media (min-width:840px) and (max-width:1000px){.pctbig{font-size:48px}}
+  @media (max-width:360px){.pctbig{font-size:46px}.inputrow input{font-size:21px}}
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<!-- ===== HALAMAN UTAMA ===== -->
+<div id="pageMain" class="wrap">
   <header>
     <h1>Kalkulator Potongan</h1>
   </header>
+
+  <div id="nameSelectorCard" class="card" style="display:none;margin-bottom:14px">
+    <div class="label">Pilih Nama</div>
+    <div class="desc">Diatur oleh admin</div>
+    <div class="chips" id="nameChips"></div>
+    <div id="nameBanner" class="name-banner" style="display:none">
+      <div>
+        <div class="nb-name" id="bannerName"></div>
+        <div class="nb-pinjam" id="bannerPinjam"></div>
+      </div>
+      <button onclick="clearSelectedName()" title="Hapus pilihan">&#x2715;</button>
+    </div>
+  </div>
 
   <div class="layout">
     <div class="card">
@@ -130,26 +185,211 @@
       <div class="noprofit" id="noProfit" style="display:none">Isi <b>keuntungan</b> di atas untuk melihat pembagiannya.</div>
     </div>
   </div>
+
+  <button class="admin-link" onclick="showPage('login')">&#9881; Admin</button>
+</div>
+
+<!-- ===== HALAMAN LOGIN ADMIN ===== -->
+<div id="pageLogin" class="wrap" style="display:none">
+  <div class="login-wrap">
+    <div class="admin-header">
+      <h1>Admin Login</h1>
+      <button class="back-btn" onclick="showPage('main')">&#8592; Kembali</button>
+    </div>
+    <div class="card">
+      <div id="loginAlert" class="alert alert-err">Password salah.</div>
+      <div class="form-group">
+        <div class="form-label">Password</div>
+        <input class="input-field" type="password" id="loginPass" placeholder="Masukkan password" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn btn-gold" onclick="doLogin()">Masuk</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HALAMAN ADMIN PANEL ===== -->
+<div id="pageAdmin" class="wrap" style="display:none">
+  <div class="admin-header">
+    <h1>Panel Admin</h1>
+    <button class="back-btn" onclick="adminLogout()">&#8592; Keluar &amp; Kembali</button>
+  </div>
+
+  <div class="card">
+    <div class="label" style="margin-bottom:16px">Tambah Orang</div>
+    <div id="addAlert" class="alert alert-err"></div>
+    <div class="form-group">
+      <div class="form-label">Nama</div>
+      <input class="input-field" type="text" id="newName" placeholder="Contoh: Budi" maxlength="40">
+    </div>
+    <div class="form-group">
+      <div class="form-label">Jumlah Pinjaman</div>
+      <select class="input-field" id="newPinjam">
+        <option value="10000000">Rp 10.000.000 &nbsp;(10 juta)</option>
+        <option value="20000000">Rp 20.000.000 &nbsp;(20 juta)</option>
+        <option value="30000000" selected>Rp 30.000.000 &nbsp;(30 juta)</option>
+        <option value="40000000">Rp 40.000.000 &nbsp;(40 juta)</option>
+        <option value="50000000">Rp 50.000.000 &nbsp;(50 juta)</option>
+        <option value="60000000">Rp 60.000.000 &nbsp;(60 juta)</option>
+      </select>
+    </div>
+    <button class="btn btn-green" onclick="addPerson()">+ Tambah</button>
+  </div>
+
+  <div class="card">
+    <div class="label" style="margin-bottom:16px">Daftar Orang</div>
+    <div id="personList"></div>
+  </div>
+
+  <div class="card">
+    <div class="label" style="margin-bottom:16px">Ganti Password Admin</div>
+    <div id="passAlert" class="alert"></div>
+    <div class="form-group">
+      <div class="form-label">Password Baru</div>
+      <input class="input-field" type="password" id="newPass" placeholder="Password baru">
+    </div>
+    <div class="form-group">
+      <div class="form-label">Konfirmasi Password</div>
+      <input class="input-field" type="password" id="confirmPass" placeholder="Ulangi password baru">
+    </div>
+    <button class="btn btn-gold" onclick="changePassword()">Simpan Password</button>
+  </div>
 </div>
 
 <script>
-const fmtRp = n => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+const ADMIN_PASS_KEY = 'kp_admin_pass';
+const PERSONS_KEY    = 'kp_persons';
+
+function getPass(){ return localStorage.getItem(ADMIN_PASS_KEY) || 'admin'; }
+function getPersons(){ try{ return JSON.parse(localStorage.getItem(PERSONS_KEY))||[]; }catch{ return []; } }
+function savePersons(p){ localStorage.setItem(PERSONS_KEY, JSON.stringify(p)); }
+
+function showPage(name){
+  ['Main','Login','Admin'].forEach(n=>{
+    document.getElementById('page'+n).style.display = n.toLowerCase()===name ? 'block' : 'none';
+  });
+  if(name==='main')  renderNameChips();
+  if(name==='admin') renderPersonList();
+  if(name==='login'){ document.getElementById('loginPass').value=''; hideAlert('loginAlert'); }
+  window.scrollTo(0,0);
+}
+
+function doLogin(){
+  const pass = document.getElementById('loginPass').value;
+  if(pass === getPass()){ hideAlert('loginAlert'); showPage('admin'); }
+  else showAlert('loginAlert','err','Password salah.');
+}
+function adminLogout(){ showPage('main'); }
+
+function showAlert(id, type, msg){
+  const el = document.getElementById(id);
+  el.className = 'alert '+(type==='ok'?'alert-ok':'alert-err');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideAlert(id){ document.getElementById(id).style.display = 'none'; }
+
+function esc(s){ return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function addPerson(){
+  const name = document.getElementById('newName').value.trim();
+  const pinjam = Number(document.getElementById('newPinjam').value);
+  if(!name){ showAlert('addAlert','err','Nama tidak boleh kosong.'); return; }
+  const persons = getPersons();
+  if(persons.find(p=>p.name.toLowerCase()===name.toLowerCase())){
+    showAlert('addAlert','err','Nama sudah ada dalam daftar.'); return;
+  }
+  persons.push({ id: Date.now(), name, pinjam });
+  savePersons(persons);
+  document.getElementById('newName').value = '';
+  hideAlert('addAlert');
+  renderPersonList();
+}
+
+function deletePerson(id){
+  savePersons(getPersons().filter(p=>p.id!==id));
+  if(selectedPersonId===id) clearSelectedName();
+  renderPersonList();
+}
+
+function renderPersonList(){
+  const persons = getPersons();
+  const el = document.getElementById('personList');
+  if(!persons.length){
+    el.innerHTML='<div class="empty-msg">Belum ada orang yang ditambahkan.</div>';
+    return;
+  }
+  el.innerHTML='<div class="person-list">'+persons.map(p=>`
+    <div class="person-item">
+      <div>
+        <div class="pi-name">${esc(p.name)}</div>
+        <div class="pi-pinjam">Pinjaman: ${fmtRp(p.pinjam)}</div>
+      </div>
+      <button class="pi-del" onclick="deletePerson(${p.id})" title="Hapus">&#128465;</button>
+    </div>
+  `).join('')+'</div>';
+}
+
+function changePassword(){
+  const np=document.getElementById('newPass').value;
+  const cp=document.getElementById('confirmPass').value;
+  if(!np){ showAlert('passAlert','err','Password baru tidak boleh kosong.'); return; }
+  if(np!==cp){ showAlert('passAlert','err','Konfirmasi password tidak cocok.'); return; }
+  localStorage.setItem(ADMIN_PASS_KEY, np);
+  document.getElementById('newPass').value='';
+  document.getElementById('confirmPass').value='';
+  showAlert('passAlert','ok','Password berhasil diubah!');
+}
+
+let selectedPersonId = null;
+
+function renderNameChips(){
+  const persons = getPersons();
+  const card = document.getElementById('nameSelectorCard');
+  if(!persons.length){ card.style.display='none'; return; }
+  card.style.display='block';
+  document.getElementById('nameChips').innerHTML=persons.map(p=>
+    `<button class="chip name-chip${selectedPersonId===p.id?' active':''}" onclick="selectPerson(${p.id})">${esc(p.name)}</button>`
+  ).join('');
+}
+
+function selectPerson(id){
+  const p = getPersons().find(x=>x.id===id);
+  if(!p) return;
+  selectedPersonId = id;
+  document.getElementById('pinjam').value = Number(p.pinjam).toLocaleString('id-ID');
+  document.getElementById('bannerName').textContent = p.name;
+  document.getElementById('bannerPinjam').textContent = 'Pinjaman: '+fmtRp(p.pinjam);
+  document.getElementById('nameBanner').style.display = 'flex';
+  renderNameChips();
+  calc();
+}
+
+function clearSelectedName(){
+  selectedPersonId = null;
+  document.getElementById('nameBanner').style.display='none';
+  document.getElementById('pinjam').value='';
+  renderNameChips();
+  calc();
+}
+
+const fmtRp  = n => 'Rp ' + Math.round(n).toLocaleString('id-ID');
 const fmtPct = p => (Number.isInteger(p)?p.toString():p.toFixed(1).replace('.',','))+'%';
 
-const pinjamEl=document.getElementById('pinjam');
-const garapEl=document.getElementById('garap');
-const profitEl=document.getElementById('profit');
+const pinjamEl = document.getElementById('pinjam');
+const garapEl  = document.getElementById('garap');
+const profitEl = document.getElementById('profit');
 const val = el => Number((el.value||'').replace(/\D/g,''))||0;
 
 [pinjamEl,garapEl,profitEl].forEach(el=>{
   el.addEventListener('input',()=>{
     const d=(el.value||'').replace(/\D/g,'');
     el.value = d==='' ? '' : Number(d).toLocaleString('id-ID');
+    if(el===pinjamEl){ selectedPersonId=null; document.getElementById('nameBanner').style.display='none'; renderNameChips(); }
     calc();
   });
 });
 
-function chipLabel(v){return v>=1e6 ? (v/1e6)+'jt' : (v/1e3)+'rb';}
+function chipLabel(v){ return v>=1e6?(v/1e6)+'jt':(v/1e3)+'rb'; }
 function buildChips(id,target,presets){
   const c=document.getElementById(id);
   presets.forEach(v=>{
@@ -174,24 +414,21 @@ function syncChips(id,v){
 }
 
 function calc(){
-  const pinjam=val(pinjamEl), garap=val(garapEl), profit=val(profitEl);
-  const pct = garap>0 ? (pinjam/garap)*60 : 0;
-
+  const pinjam=val(pinjamEl),garap=val(garapEl),profit=val(profitEl);
+  const pct=garap>0?(pinjam/garap)*60:0;
   document.getElementById('pctVal').textContent=fmtPct(pct);
-  document.getElementById('pctForm').textContent = 'Pinjaman ÷ Garapan × 60%';
-
+  document.getElementById('pctForm').textContent='Pinjaman ÷ Garapan × 60%';
   const splitRows=document.getElementById('splitRows');
   const noProfit=document.getElementById('noProfit');
   if(profit>0){
-    const cut=profit*(pct/100), rest=profit-cut;
+    const cut=profit*(pct/100),rest=profit-cut;
     document.getElementById('cutVal').textContent=fmtRp(cut);
     document.getElementById('cutNote').textContent=fmtPct(pct)+' dari keuntungan';
     document.getElementById('restVal').textContent=fmtRp(rest);
     splitRows.style.display='block'; noProfit.style.display='none';
-  }else{
+  } else {
     splitRows.style.display='none'; noProfit.style.display='block';
   }
-
   syncChips('chipsPinjam',pinjam);
   syncChips('chipsGarap',garap);
   syncChips('chipsProfit',profit);
@@ -201,6 +438,7 @@ pinjamEl.value=(30000000).toLocaleString('id-ID');
 garapEl.value=(60000000).toLocaleString('id-ID');
 profitEl.value=(1000000).toLocaleString('id-ID');
 calc();
+renderNameChips();
 </script>
 </body>
 </html>
