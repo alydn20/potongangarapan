@@ -149,9 +149,8 @@
     <div class="card">
       <div class="field">
         <div class="label">Pinjaman</div>
-        <div class="desc">uang yang Anda pinjamkan</div>
-        <div class="inputrow"><span class="rp">Rp</span><input type="text" id="pinjam" inputmode="numeric" autocomplete="off" placeholder="0"></div>
-        <div class="chips" id="chipsPinjam"></div>
+        <div class="desc">dipilih dari nama di atas</div>
+        <div class="inputrow" style="opacity:.7;cursor:not-allowed"><span class="rp">Rp</span><input type="text" id="pinjam" autocomplete="off" placeholder="Pilih nama dulu" readonly style="cursor:not-allowed;color:var(--muted)"></div>
       </div>
       <div class="field">
         <div class="label">Garapan</div>
@@ -223,14 +222,12 @@
     </div>
     <div class="form-group">
       <div class="form-label">Jumlah Pinjaman</div>
-      <select class="input-field" id="newPinjam">
-        <option value="10000000">Rp 10.000.000 &nbsp;(10 juta)</option>
-        <option value="20000000">Rp 20.000.000 &nbsp;(20 juta)</option>
-        <option value="30000000" selected>Rp 30.000.000 &nbsp;(30 juta)</option>
-        <option value="40000000">Rp 40.000.000 &nbsp;(40 juta)</option>
-        <option value="50000000">Rp 50.000.000 &nbsp;(50 juta)</option>
-        <option value="60000000">Rp 60.000.000 &nbsp;(60 juta)</option>
-      </select>
+      <div style="display:flex;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:4px 15px;transition:border-color .15s" id="adminPinjamRow">
+        <span style="color:var(--muted);font-weight:600;font-size:15px;margin-right:8px;font-family:'Sora',sans-serif">Rp</span>
+        <input class="input-field" type="text" id="newPinjam" inputmode="numeric" placeholder="Contoh: 35.000.000" autocomplete="off"
+          style="border:none;padding:10px 0;font-family:'Sora',sans-serif;font-size:18px;font-weight:700;background:none"
+          oninput="fmtAdminPinjam(this)">
+      </div>
     </div>
     <button class="btn btn-green" onclick="addPerson()">+ Tambah</button>
   </div>
@@ -290,10 +287,18 @@ function hideAlert(id){ document.getElementById(id).style.display = 'none'; }
 
 function esc(s){ return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+function fmtAdminPinjam(el){
+  const d=(el.value||'').replace(/\D/g,'');
+  el.value = d==='' ? '' : Number(d).toLocaleString('id-ID');
+  const row=document.getElementById('adminPinjamRow');
+  row.style.borderColor = d ? 'var(--gold)' : 'var(--line)';
+}
+
 function addPerson(){
   const name = document.getElementById('newName').value.trim();
-  const pinjam = Number(document.getElementById('newPinjam').value);
+  const pinjam = Number((document.getElementById('newPinjam').value||'').replace(/\D/g,''));
   if(!name){ showAlert('addAlert','err','Nama tidak boleh kosong.'); return; }
+  if(!pinjam || pinjam<1000){ showAlert('addAlert','err','Jumlah pinjaman tidak valid.'); return; }
   const persons = getPersons();
   if(persons.find(p=>p.name.toLowerCase()===name.toLowerCase())){
     showAlert('addAlert','err','Nama sudah ada dalam daftar.'); return;
@@ -301,6 +306,8 @@ function addPerson(){
   persons.push({ id: Date.now(), name, pinjam });
   savePersons(persons);
   document.getElementById('newName').value = '';
+  document.getElementById('newPinjam').value = '';
+  document.getElementById('adminPinjamRow').style.borderColor='var(--line)';
   hideAlert('addAlert');
   renderPersonList();
 }
@@ -380,11 +387,10 @@ const garapEl  = document.getElementById('garap');
 const profitEl = document.getElementById('profit');
 const val = el => Number((el.value||'').replace(/\D/g,''))||0;
 
-[pinjamEl,garapEl,profitEl].forEach(el=>{
+[garapEl,profitEl].forEach(el=>{
   el.addEventListener('input',()=>{
     const d=(el.value||'').replace(/\D/g,'');
     el.value = d==='' ? '' : Number(d).toLocaleString('id-ID');
-    if(el===pinjamEl){ selectedPersonId=null; document.getElementById('nameBanner').style.display='none'; renderNameChips(); }
     calc();
   });
 });
@@ -403,7 +409,6 @@ function buildChips(id,target,presets){
   x.onclick=()=>{target.value='';calc();};
   c.appendChild(x);
 }
-buildChips('chipsPinjam',pinjamEl,[10000000,20000000,30000000,40000000,50000000,60000000]);
 buildChips('chipsGarap',garapEl,[10000000,30000000,40000000,50000000,60000000]);
 buildChips('chipsProfit',profitEl,[500000,1000000,5000000,10000000,20000000]);
 
@@ -429,12 +434,10 @@ function calc(){
   } else {
     splitRows.style.display='none'; noProfit.style.display='block';
   }
-  syncChips('chipsPinjam',pinjam);
   syncChips('chipsGarap',garap);
   syncChips('chipsProfit',profit);
 }
 
-pinjamEl.value=(30000000).toLocaleString('id-ID');
 garapEl.value=(60000000).toLocaleString('id-ID');
 profitEl.value=(1000000).toLocaleString('id-ID');
 calc();
