@@ -97,8 +97,23 @@
   .person-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
   .person-item .pi-name{font-family:'Sora',sans-serif;font-weight:700;font-size:16px}
   .person-item .pi-pinjam{color:var(--gold);font-size:13px;margin-top:3px}
+  .person-item .pi-actions{display:flex;gap:4px}
   .person-item .pi-del{background:none;border:none;color:#5a3a3a;cursor:pointer;font-size:20px;padding:2px 6px;transition:color .12s}
   .person-item .pi-del:hover{color:var(--red)}
+  .person-item .pi-edit{background:none;border:none;color:#3a5a4a;cursor:pointer;font-size:18px;padding:2px 6px;transition:color .12s}
+  .person-item .pi-edit:hover{color:var(--green)}
+  .edit-form{background:#0f1e18;border:1px solid var(--gold-dim);border-radius:12px;padding:16px}
+  .edit-form .ef-row{display:flex;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:3px 12px;margin-bottom:10px;transition:border-color .15s}
+  .edit-form .ef-row:focus-within{border-color:var(--gold)}
+  .edit-form .ef-rp{color:var(--muted);font-size:13px;font-weight:600;font-family:'Sora',sans-serif;margin-right:7px}
+  .edit-form .ef-label{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;letter-spacing:.04em;text-transform:uppercase}
+  .edit-form .ef-input{flex:1;background:none;border:none;color:var(--ink);font-family:'Sora',sans-serif;font-weight:700;font-size:16px;padding:9px 0;outline:none;min-width:0}
+  .edit-form .ef-name{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--ink);font-family:'Sora',sans-serif;font-weight:700;font-size:16px;outline:none;margin-bottom:10px;transition:border-color .15s}
+  .edit-form .ef-name:focus{border-color:var(--gold)}
+  .edit-form .ef-btns{display:flex;gap:8px}
+  .edit-form .ef-save{flex:1;padding:10px;border:none;border-radius:9px;background:var(--green);color:#0a1a10;font-family:'Sora',sans-serif;font-weight:700;font-size:13px;cursor:pointer}
+  .edit-form .ef-cancel{flex:1;padding:10px;border:1px solid var(--line);border-radius:9px;background:none;color:var(--muted);font-family:'Sora',sans-serif;font-weight:600;font-size:13px;cursor:pointer}
+  .edit-form .ef-cancel:hover{color:var(--ink)}
 
   .empty-msg{text-align:center;color:var(--muted);padding:28px 0;font-size:14px}
 
@@ -339,15 +354,64 @@ function renderPersonList(){
     return;
   }
   el.innerHTML='<div class="person-list">'+persons.map(p=>`
-    <div class="person-item">
+    <div class="person-item" id="pi-${p.id}">
       <div>
         <div class="pi-name">${esc(p.name)}</div>
         <div class="pi-pinjam">Pinjaman: ${fmtRp(p.pinjam)}</div>
         <div class="pi-pinjam" style="color:var(--muted)">Garapan: ${fmtRp(p.garap||0)}</div>
       </div>
-      <button class="pi-del" onclick="deletePerson(${p.id})" title="Hapus">&#128465;</button>
+      <div class="pi-actions">
+        <button class="pi-edit" onclick="showEditForm(${p.id})" title="Edit">&#9998;</button>
+        <button class="pi-del"  onclick="deletePerson(${p.id})" title="Hapus">&#128465;</button>
+      </div>
     </div>
   `).join('')+'</div>';
+}
+
+function showEditForm(id){
+  const p = getPersons().find(x=>x.id===id);
+  if(!p) return;
+  const el = document.getElementById('pi-'+id);
+  el.outerHTML = `
+    <div class="edit-form" id="pi-${id}">
+      <div class="ef-label">Nama</div>
+      <input class="ef-name" id="ef-name-${id}" value="${esc(p.name)}" maxlength="40">
+      <div class="ef-label">Pinjaman</div>
+      <div class="ef-row">
+        <span class="ef-rp">Rp</span>
+        <input class="ef-input" id="ef-pinjam-${id}" inputmode="numeric" value="${Number(p.pinjam).toLocaleString('id-ID')}"
+          oninput="fmtEfField(this)">
+      </div>
+      <div class="ef-label">Garapan</div>
+      <div class="ef-row">
+        <span class="ef-rp">Rp</span>
+        <input class="ef-input" id="ef-garap-${id}" inputmode="numeric" value="${Number(p.garap||0).toLocaleString('id-ID')}"
+          oninput="fmtEfField(this)">
+      </div>
+      <div class="ef-btns">
+        <button class="ef-save"   onclick="savePerson(${id})">Simpan</button>
+        <button class="ef-cancel" onclick="renderPersonList()">Batal</button>
+      </div>
+    </div>`;
+}
+
+function fmtEfField(el){
+  const d=(el.value||'').replace(/\D/g,'');
+  const pos=el.selectionStart;
+  el.value = d==='' ? '' : Number(d).toLocaleString('id-ID');
+}
+
+function savePerson(id){
+  const name   = (document.getElementById('ef-name-'+id).value||'').trim();
+  const pinjam = Number((document.getElementById('ef-pinjam-'+id).value||'').replace(/\D/g,''));
+  const garap  = Number((document.getElementById('ef-garap-'+id).value||'').replace(/\D/g,''));
+  if(!name)  { alert('Nama tidak boleh kosong.'); return; }
+  if(!pinjam || pinjam<1000){ alert('Jumlah pinjaman tidak valid.'); return; }
+  if(!garap  || garap<1000) { alert('Jumlah garapan tidak valid.'); return; }
+  const persons = getPersons().map(p=> p.id===id ? {...p, name, pinjam, garap} : p);
+  savePersons(persons);
+  if(selectedPersonId===id) clearSelectedName();
+  renderPersonList();
 }
 
 function changePassword(){
