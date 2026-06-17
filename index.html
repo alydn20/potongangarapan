@@ -227,7 +227,16 @@
         <span style="color:var(--muted);font-weight:600;font-size:15px;margin-right:8px;font-family:'Sora',sans-serif">Rp</span>
         <input class="input-field" type="text" id="newPinjam" inputmode="numeric" placeholder="Contoh: 35.000.000" autocomplete="off"
           style="border:none;padding:10px 0;font-family:'Sora',sans-serif;font-size:18px;font-weight:700;background:none"
-          oninput="fmtAdminPinjam(this)">
+          oninput="fmtAdminField(this,'adminPinjamRow')">
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">Garapan</div>
+      <div style="display:flex;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:4px 15px;transition:border-color .15s" id="adminGarapRow">
+        <span style="color:var(--muted);font-weight:600;font-size:15px;margin-right:8px;font-family:'Sora',sans-serif">Rp</span>
+        <input class="input-field" type="text" id="newGarap" inputmode="numeric" placeholder="Contoh: 60.000.000" autocomplete="off"
+          style="border:none;padding:10px 0;font-family:'Sora',sans-serif;font-size:18px;font-weight:700;background:none"
+          oninput="fmtAdminField(this,'adminGarapRow')">
       </div>
     </div>
     <button class="btn btn-green" onclick="addPerson()">+ Tambah</button>
@@ -288,27 +297,30 @@ function hideAlert(id){ document.getElementById(id).style.display = 'none'; }
 
 function esc(s){ return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-function fmtAdminPinjam(el){
+function fmtAdminField(el, rowId){
   const d=(el.value||'').replace(/\D/g,'');
   el.value = d==='' ? '' : Number(d).toLocaleString('id-ID');
-  const row=document.getElementById('adminPinjamRow');
-  row.style.borderColor = d ? 'var(--gold)' : 'var(--line)';
+  document.getElementById(rowId).style.borderColor = d ? 'var(--gold)' : 'var(--line)';
 }
 
 function addPerson(){
-  const name = document.getElementById('newName').value.trim();
+  const name   = document.getElementById('newName').value.trim();
   const pinjam = Number((document.getElementById('newPinjam').value||'').replace(/\D/g,''));
-  if(!name){ showAlert('addAlert','err','Nama tidak boleh kosong.'); return; }
+  const garap  = Number((document.getElementById('newGarap').value||'').replace(/\D/g,''));
+  if(!name)  { showAlert('addAlert','err','Nama tidak boleh kosong.'); return; }
   if(!pinjam || pinjam<1000){ showAlert('addAlert','err','Jumlah pinjaman tidak valid.'); return; }
+  if(!garap  || garap<1000) { showAlert('addAlert','err','Jumlah garapan tidak valid.'); return; }
   const persons = getPersons();
   if(persons.find(p=>p.name.toLowerCase()===name.toLowerCase())){
     showAlert('addAlert','err','Nama sudah ada dalam daftar.'); return;
   }
-  persons.push({ id: Date.now(), name, pinjam });
+  persons.push({ id: Date.now(), name, pinjam, garap });
   savePersons(persons);
-  document.getElementById('newName').value = '';
+  document.getElementById('newName').value  = '';
   document.getElementById('newPinjam').value = '';
+  document.getElementById('newGarap').value  = '';
   document.getElementById('adminPinjamRow').style.borderColor='var(--line)';
+  document.getElementById('adminGarapRow').style.borderColor='var(--line)';
   hideAlert('addAlert');
   renderPersonList();
 }
@@ -331,6 +343,7 @@ function renderPersonList(){
       <div>
         <div class="pi-name">${esc(p.name)}</div>
         <div class="pi-pinjam">Pinjaman: ${fmtRp(p.pinjam)}</div>
+        <div class="pi-pinjam" style="color:var(--muted)">Garapan: ${fmtRp(p.garap||0)}</div>
       </div>
       <button class="pi-del" onclick="deletePerson(${p.id})" title="Hapus">&#128465;</button>
     </div>
@@ -365,8 +378,9 @@ function selectPerson(id){
   if(!p) return;
   selectedPersonId = id;
   document.getElementById('pinjam').value = Number(p.pinjam).toLocaleString('id-ID');
-  document.getElementById('bannerName').textContent = p.name;
-  document.getElementById('bannerPinjam').textContent = 'Pinjaman: '+fmtRp(p.pinjam);
+  document.getElementById('garap').value  = Number(p.garap||0).toLocaleString('id-ID');
+  document.getElementById('bannerName').textContent   = p.name;
+  document.getElementById('bannerPinjam').textContent = 'Pinjaman: '+fmtRp(p.pinjam)+' · Garapan: '+fmtRp(p.garap||0);
   document.getElementById('nameBanner').style.display = 'flex';
   renderNameChips();
   calc();
@@ -376,6 +390,7 @@ function clearSelectedName(){
   selectedPersonId = null;
   document.getElementById('nameBanner').style.display='none';
   document.getElementById('pinjam').value='';
+  document.getElementById('garap').value='';
   renderNameChips();
   calc();
 }
