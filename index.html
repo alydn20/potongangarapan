@@ -256,7 +256,7 @@
 const ADMIN_PASS_KEY = 'kp_admin_pass';
 const PERSONS_KEY    = 'kp_persons';
 
-function getPass(){ return localStorage.getItem(ADMIN_PASS_KEY) || 'admin'; }
+function getPass(){ return localStorage.getItem(ADMIN_PASS_KEY) || '@Ahaqos20'; }
 function getPersons(){ try{ return JSON.parse(localStorage.getItem(PERSONS_KEY))||[]; }catch{ return []; } }
 function savePersons(p){ localStorage.setItem(PERSONS_KEY, JSON.stringify(p)); }
 
