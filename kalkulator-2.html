@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Potongan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E1613;--bg2:#0A100E;--card:#16201C;--line:#283631;
+    --ink:#EAF0EC;--muted:#8A998F;--gold:#E0B65C;--gold-dim:#9c7e3a;--green:#5FC58D;--radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:radial-gradient(120% 80% at 50% -10%, #14211C 0%, var(--bg) 45%, var(--bg2) 100%);
+    background-attachment:fixed;
+    color:var(--ink);min-height:100vh;padding:26px 18px 60px;-webkit-font-smoothing:antialiased;
+    display:flex;justify-content:center;
+  }
+  .wrap{max-width:480px;width:100%}
+
+  header{text-align:center;margin:6px 0 24px}
+  h1{font-family:'Sora',sans-serif;font-weight:700;font-size:27px;line-height:1.1;letter-spacing:-.01em}
+
+  .layout{display:block}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:14px}
+
+  .field+.field{margin-top:20px}
+  .label{font-weight:600;font-size:15px;margin-bottom:5px}
+  .desc{color:var(--muted);font-size:12px;margin-bottom:11px}
+  .inputrow{display:flex;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:13px;padding:4px 15px;transition:border-color .15s}
+  .inputrow:focus-within{border-color:var(--gold)}
+  .inputrow .rp{color:var(--muted);font-weight:600;font-size:17px;font-family:'Sora',sans-serif;margin-right:9px}
+  .inputrow input{flex:1;background:none;border:none;color:var(--ink);font-family:'Sora',sans-serif;font-weight:600;font-size:24px;padding:13px 0;outline:none;width:100%;font-variant-numeric:tabular-nums;min-width:0}
+  .inputrow input::placeholder{color:#465249}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+  .chip{background:var(--bg2);border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:8px 12px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;transition:all .12s}
+  .chip:hover{color:var(--ink);border-color:#3a4a43}
+  .chip.active{background:var(--gold);border-color:var(--gold);color:#1a1206}
+  .chip.clear{margin-left:auto;color:#7d6a6a}
+  .chip.clear:hover{border-color:#5a3f3f;color:#c98e8e}
+
+  .result{background:linear-gradient(165deg,#22302A 0%, #18221E 100%);border:1px solid var(--gold-dim);text-align:center;padding:24px 20px}
+  .result .lbl{color:var(--gold);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin-bottom:12px}
+  .pctbig{font-family:'Sora',sans-serif;font-weight:800;font-size:54px;color:var(--gold);line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .pctform{color:var(--muted);font-size:12.5px;margin-top:10px;min-height:1em}
+
+  .splitrows{margin-top:22px;border-top:1px solid var(--line);padding-top:6px;text-align:left}
+  .srow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid rgba(40,54,49,.6)}
+  .srow:last-child{border-bottom:none}
+  .srow .k{font-size:13.5px;font-weight:600}
+  .srow .k small{display:block;color:var(--muted);font-weight:400;font-size:11.5px;margin-top:3px}
+  .srow .dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:8px;vertical-align:middle}
+  .srow .v{font-family:'Sora',sans-serif;font-weight:700;font-size:20px;font-variant-numeric:tabular-nums;text-align:right;word-break:break-word}
+  .v.gold{color:var(--gold)} .v.green{color:var(--green)}
+  .dot.gold{background:var(--gold)} .dot.green{background:var(--green)}
+
+  .noprofit{color:var(--muted);font-size:12.5px;margin-top:18px;border-top:1px solid var(--line);padding-top:16px;line-height:1.5}
+
+  /* ---------- DESKTOP / TABLET ---------- */
+  @media (min-width:840px){
+    body{align-items:flex-start;padding-top:48px}
+    .wrap{max-width:880px}
+    header{margin:4px 0 28px}
+    h1{font-size:32px}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+    .card{margin-bottom:0}
+    .result{position:sticky;top:48px}
+    .pctbig{font-size:60px}
+  }
+  @media (min-width:840px) and (max-width:1000px){
+    .pctbig{font-size:48px}
+  }
+
+  /* keep usable on very small phones */
+  @media (max-width:360px){
+    .pctbig{font-size:46px}
+    .inputrow input{font-size:21px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Kalkulator Potongan</h1>
+  </header>
+
+  <div class="layout">
+    <div class="card">
+      <div class="field">
+        <div class="label">Pinjaman</div>
+        <div class="desc">uang yang Anda pinjamkan</div>
+        <div class="inputrow"><span class="rp">Rp</span><input type="text" id="pinjam" inputmode="numeric" autocomplete="off" placeholder="0"></div>
+        <div class="chips" id="chipsPinjam"></div>
+      </div>
+      <div class="field">
+        <div class="label">Garapan</div>
+        <div class="desc">nilai yang digarap</div>
+        <div class="inputrow"><span class="rp">Rp</span><input type="text" id="garap" inputmode="numeric" autocomplete="off" placeholder="0"></div>
+        <div class="chips" id="chipsGarap"></div>
+      </div>
+      <div class="field">
+        <div class="label">Keuntungan</div>
+        <div class="desc">profit yang akan dibagi</div>
+        <div class="inputrow"><span class="rp">Rp</span><input type="text" id="profit" inputmode="numeric" autocomplete="off" placeholder="0"></div>
+        <div class="chips" id="chipsProfit"></div>
+      </div>
+    </div>
+
+    <div class="card result">
+      <div class="lbl">Persentase Dipotong</div>
+      <div class="pctbig" id="pctVal">30%</div>
+      <div class="pctform" id="pctForm">Pinjaman &divide; Garapan &times; 60%</div>
+
+      <div class="splitrows" id="splitRows">
+        <div class="srow">
+          <div class="k"><span class="dot green"></span>Dipotong<small id="cutNote">dari keuntungan</small></div>
+          <div class="v green" id="cutVal">Rp 0</div>
+        </div>
+        <div class="srow">
+          <div class="k"><span class="dot gold"></span>Sisa untuk Anda<small>setelah dipotong</small></div>
+          <div class="v gold" id="restVal">Rp 0</div>
+        </div>
+      </div>
+      <div class="noprofit" id="noProfit" style="display:none">Isi <b>keuntungan</b> di atas untuk melihat pembagiannya.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const fmtRp = n => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+const fmtPct = p => (Number.isInteger(p)?p.toString():p.toFixed(1).replace('.',','))+'%';
+
+const pinjamEl=document.getElementById('pinjam');
+const garapEl=document.getElementById('garap');
+const profitEl=document.getElementById('profit');
+const val = el => Number((el.value||'').replace(/\D/g,''))||0;
+
+[pinjamEl,garapEl,profitEl].forEach(el=>{
+  el.addEventListener('input',()=>{
+    const d=(el.value||'').replace(/\D/g,'');
+    el.value = d==='' ? '' : Number(d).toLocaleString('id-ID');
+    calc();
+  });
+});
+
+function chipLabel(v){return v>=1e6 ? (v/1e6)+'jt' : (v/1e3)+'rb';}
+function buildChips(id,target,presets){
+  const c=document.getElementById(id);
+  presets.forEach(v=>{
+    const b=document.createElement('button');
+    b.className='chip';b.textContent=chipLabel(v);b.dataset.val=v;
+    b.onclick=()=>{target.value=Number(v).toLocaleString('id-ID');calc();};
+    c.appendChild(b);
+  });
+  const x=document.createElement('button');
+  x.className='chip clear';x.textContent='Hapus';
+  x.onclick=()=>{target.value='';calc();};
+  c.appendChild(x);
+}
+buildChips('chipsPinjam',pinjamEl,[10000000,20000000,30000000,40000000,50000000,60000000]);
+buildChips('chipsGarap',garapEl,[10000000,30000000,40000000,50000000,60000000]);
+buildChips('chipsProfit',profitEl,[500000,1000000,5000000,10000000,20000000]);
+
+function syncChips(id,v){
+  document.querySelectorAll('#'+id+' .chip').forEach(ch=>{
+    if(ch.dataset.val) ch.classList.toggle('active',Number(ch.dataset.val)===v);
+  });
+}
+
+function calc(){
+  const pinjam=val(pinjamEl), garap=val(garapEl), profit=val(profitEl);
+  const pct = garap>0 ? (pinjam/garap)*60 : 0;
+
+  document.getElementById('pctVal').textContent=fmtPct(pct);
+  document.getElementById('pctForm').textContent = 'Pinjaman ÷ Garapan × 60%';
+
+  const splitRows=document.getElementById('splitRows');
+  const noProfit=document.getElementById('noProfit');
+  if(profit>0){
+    const cut=profit*(pct/100), rest=profit-cut;
+    document.getElementById('cutVal').textContent=fmtRp(cut);
+    document.getElementById('cutNote').textContent=fmtPct(pct)+' dari keuntungan';
+    document.getElementById('restVal').textContent=fmtRp(rest);
+    splitRows.style.display='block'; noProfit.style.display='none';
+  }else{
+    splitRows.style.display='none'; noProfit.style.display='block';
+  }
+
+  syncChips('chipsPinjam',pinjam);
+  syncChips('chipsGarap',garap);
+  syncChips('chipsProfit',profit);
+}
+
+pinjamEl.value=(30000000).toLocaleString('id-ID');
+garapEl.value=(60000000).toLocaleString('id-ID');
+profitEl.value=(1000000).toLocaleString('id-ID');
+calc();
+</script>
+</body>
+</html>
