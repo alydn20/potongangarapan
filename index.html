@@ -165,8 +165,8 @@
     <div class="card">
       <div class="field">
         <div class="label">Pinjaman</div>
-        <div class="desc">dipilih dari nama di atas</div>
-        <div class="inputrow" style="opacity:.7;cursor:not-allowed"><span class="rp">Rp</span><input type="text" id="pinjam" autocomplete="off" placeholder="Pilih nama dulu" readonly style="cursor:not-allowed;color:var(--muted)"></div>
+        <div class="desc" id="pinjamDesc">ketik bebas atau pilih nama di atas</div>
+        <div class="inputrow" id="pinjamRow"><span class="rp">Rp</span><input type="text" id="pinjam" inputmode="numeric" autocomplete="off" placeholder="0"></div>
       </div>
       <div class="field">
         <div class="label">Garapan</div>
@@ -487,6 +487,7 @@ function selectPerson(id){
   document.getElementById('bannerName').textContent   = p.name;
   document.getElementById('bannerPinjam').textContent = 'Pinjaman: '+fmtRp(p.pinjam)+' · Garapan: '+fmtRp(p.garap||0);
   document.getElementById('nameBanner').style.display = 'flex';
+  lockPinjam(true);
   renderNameChips();
   calc();
 }
@@ -495,6 +496,7 @@ function clearSelectedName(){
   selectedPersonId = null;
   document.getElementById('nameBanner').style.display='none';
   document.getElementById('pinjam').value='';
+  lockPinjam(false);
   document.getElementById('garap').value='';
   renderNameChips();
   calc();
@@ -508,7 +510,16 @@ const garapEl  = document.getElementById('garap');
 const profitEl = document.getElementById('profit');
 const val = el => Number((el.value||'').replace(/\D/g,''))||0;
 
-[garapEl,profitEl].forEach(el=>{
+function lockPinjam(locked){
+  pinjamEl.readOnly = locked;
+  pinjamEl.style.color = locked ? 'var(--muted)' : '';
+  pinjamEl.style.cursor = locked ? 'not-allowed' : '';
+  document.getElementById('pinjamRow').style.opacity = locked ? '.7' : '1';
+  document.getElementById('pinjamRow').style.cursor  = locked ? 'not-allowed' : '';
+  document.getElementById('pinjamDesc').textContent  = locked ? 'diisi otomatis dari nama' : 'ketik bebas atau pilih nama di atas';
+}
+
+[pinjamEl,garapEl,profitEl].forEach(el=>{
   el.addEventListener('input',()=>{
     const d=(el.value||'').replace(/\D/g,'');
     el.value = d==='' ? '' : Number(d).toLocaleString('id-ID');
