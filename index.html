@@ -263,6 +263,18 @@
   </div>
 
   <div class="card">
+    <div class="label" style="margin-bottom:16px">Sinkron ke Perangkat Lain</div>
+    <div class="desc" style="margin-bottom:14px;font-size:13px;color:var(--muted);line-height:1.6">Data tersimpan di browser ini saja. Gunakan <b style="color:var(--ink)">Ekspor</b> untuk menyalin kode, lalu <b style="color:var(--ink)">Impor</b> di perangkat lain.</div>
+    <div id="syncAlert" class="alert"></div>
+    <button class="btn btn-green" onclick="eksporData()" style="margin-bottom:10px">&#8593; Ekspor Data</button>
+    <textarea id="eksporBox" readonly style="display:none;width:100%;background:var(--bg2);border:1px solid var(--gold-dim);border-radius:11px;padding:12px;color:var(--gold);font-size:12px;font-family:monospace;resize:none;height:90px;margin-bottom:10px;outline:none" onclick="this.select()"></textarea>
+    <div style="display:flex;gap:8px">
+      <textarea id="imporBox" placeholder="Tempel kode ekspor di sini..." style="flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:12px;color:var(--ink);font-size:12px;font-family:monospace;resize:none;height:70px;outline:none;transition:border-color .15s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--line)'"></textarea>
+      <button class="btn btn-gold" onclick="imporData()" style="width:80px;height:70px;font-size:13px">&#8595; Impor</button>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="label" style="margin-bottom:16px">Ganti Password Admin</div>
     <div id="passAlert" class="alert"></div>
     <div class="form-group">
@@ -423,6 +435,35 @@ function changePassword(){
   document.getElementById('newPass').value='';
   document.getElementById('confirmPass').value='';
   showAlert('passAlert','ok','Password berhasil diubah!');
+}
+
+function eksporData(){
+  const persons = getPersons();
+  if(!persons.length){ showAlert('syncAlert','err','Belum ada data untuk diekspor.'); return; }
+  const kode = btoa(unescape(encodeURIComponent(JSON.stringify(persons))));
+  const box = document.getElementById('eksporBox');
+  box.value = kode;
+  box.style.display = 'block';
+  box.select();
+  try{ document.execCommand('copy'); showAlert('syncAlert','ok','Kode disalin! Tempel di HP lain lalu klik Impor.'); }
+  catch{ showAlert('syncAlert','ok','Kode muncul di bawah — salin lalu tempel di HP lain.'); }
+}
+
+function imporData(){
+  const kode = (document.getElementById('imporBox').value||'').trim();
+  if(!kode){ showAlert('syncAlert','err','Tempel kode ekspor dulu.'); return; }
+  try{
+    const persons = JSON.parse(decodeURIComponent(escape(atob(kode))));
+    if(!Array.isArray(persons)) throw new Error();
+    savePersons(persons);
+    document.getElementById('imporBox').value='';
+    document.getElementById('eksporBox').style.display='none';
+    showAlert('syncAlert','ok','Data berhasil diimpor! '+persons.length+' orang dimuat.');
+    renderPersonList();
+    renderNameChips();
+  } catch{
+    showAlert('syncAlert','err','Kode tidak valid. Pastikan kode benar dari hasil ekspor.');
+  }
 }
 
 let selectedPersonId = null;
